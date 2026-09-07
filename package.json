@@ -1,0 +1,9 @@
+{
+  "name": "esp32-api",
+  "version": "1.0.0",
+  "description": "ESP32 API server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
