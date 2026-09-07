@@ -1,47 +1,45 @@
 const https = require("https");
 
-function saveMeasurement(datum, vrijeme, brzina) {
+function supabaseRequest(path, method = "GET", data = null) {
     return new Promise((resolve, reject) => {
 
-        const data = JSON.stringify({
-            datum: datum,
-            vrijeme: vrijeme,
-            brzina: Number(brzina)
-        });
+        const body = data ? JSON.stringify(data) : "";
 
         const url = new URL(
-            process.env.SUPABASE_URL + "/rest/v1/wifi_measurements"
+            process.env.SUPABASE_URL + path
         );
 
         const options = {
             hostname: url.hostname,
-            path: url.pathname,
-            method: "POST",
+            path: url.pathname + url.search,
+            method: method,
             headers: {
                 "Content-Type": "application/json",
                 "apikey": process.env.SUPABASE_KEY,
-                "Authorization": "Bearer " + process.env.SUPABASE_KEY,
-                "Content-Length": Buffer.byteLength(data),
-                "Prefer": "return=minimal"
+                "Authorization": "Bearer " + process.env.SUPABASE_KEY
             }
         };
 
+        if (body) {
+            options.headers["Content-Length"] = Buffer.byteLength(body);
+        }
+
         const request = https.request(options, response => {
 
-            let body = "";
+            let responseBody = "";
 
             response.on("data", chunk => {
-                body += chunk.toString();
+                responseBody += chunk.toString();
             });
 
             response.on("end", () => {
 
                 if (response.statusCode >= 200 && response.statusCode < 300) {
-                    resolve();
+                    resolve(responseBody);
                 } else {
                     reject(
                         new Error(
-                            `Supabase HTTP ${response.statusCode}: ${body}`
+                            `Supabase HTTP ${response.statusCode}: ${responseBody}`
                         )
                     );
                 }
@@ -50,9 +48,33 @@ function saveMeasurement(datum, vrijeme, brzina) {
 
         request.on("error", reject);
 
-        request.write(data);
+        if (body) {
+            request.write(body);
+        }
+
         request.end();
     });
 }
 
-module.exports = { saveMeasurement };
+function saveMeasurement(datum, vrijeme, brzina) {
+    return supabaseRequest(
+        "/rest/v1/wifi_measurements",
+        "POST",
+        {
+            datum: datum,
+            vrijeme: vrijeme,
+            brzina: Number(brzina)
+        }
+    );
+}
+
+function getMeasurements() {
+    return supabaseRequest(
+        "/rest/v1/wifi_measurements?select=*&order=datum.desc, vrijeme.desc&limit=100"
+    );
+}
+
+module.exports = {
+    saveMeasurement,
+    getMeasurements
+};
