@@ -9,26 +9,31 @@ const server = http.createServer((req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const path = url.pathname;
 // Speed test - download
+// Speed test - download
 if (req.method === "GET" && path === "/speedtest/download") {
 
-    const size = 5 * 1024 * 1024; // 5 MB
+    const size = 20 * 1024 * 1024; // 20 MB
     const chunk = Buffer.alloc(64 * 1024, 0);
 
     res.writeHead(200, {
         "Content-Type": "application/octet-stream",
         "Content-Length": size,
-        "Cache-Control": "no-store"
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Pragma": "no-cache"
     });
 
     let sent = 0;
 
     function sendChunk() {
+
         while (sent < size) {
 
             const remaining = size - sent;
-            const data = remaining >= chunk.length
-                ? chunk
-                : chunk.subarray(0, remaining);
+
+            const data =
+                remaining >= chunk.length
+                    ? chunk
+                    : chunk.subarray(0, remaining);
 
             sent += data.length;
 
