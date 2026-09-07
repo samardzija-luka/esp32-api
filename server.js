@@ -1,8 +1,12 @@
 const http = require("http");
-const { saveMeasurement } = require("./db");
+const {
+    saveMeasurement,
+    getMeasurements
+} = require("./db");
 
 const server = http.createServer((req, res) => {
 
+    // ESP32 šalje podatke
     if (req.method === "POST" && req.url === "/log") {
 
         let body = "";
@@ -55,14 +59,46 @@ const server = http.createServer((req, res) => {
                 });
         });
 
-    } else {
-
-        res.writeHead(200, {
-            "Content-Type": "text/plain; charset=utf-8"
-        });
-
-        res.end("ESP32 API OK");
+        return;
     }
+
+    // Web stranica traži podatke
+    if (req.method === "GET" && req.url === "/data") {
+
+        getMeasurements()
+            .then(data => {
+
+                res.writeHead(200, {
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Access-Control-Allow-Origin": "*"
+                });
+
+                res.end(data);
+
+            })
+            .catch(error => {
+
+                console.error("Greska pri citanju:", error.message);
+
+                res.writeHead(500, {
+                    "Content-Type": "application/json; charset=utf-8"
+                });
+
+                res.end(JSON.stringify({
+                    status: "error",
+                    message: "Greska pri citanju podataka"
+                }));
+            });
+
+        return;
+    }
+
+    // Test
+    res.writeHead(200, {
+        "Content-Type": "text/plain; charset=utf-8"
+    });
+
+    res.end("ESP32 API OK");
 });
 
 const PORT = process.env.PORT || 3000;
