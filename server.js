@@ -6,8 +6,11 @@ const {
 
 const server = http.createServer((req, res) => {
 
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const path = url.pathname;
+
     // ESP32 šalje podatke
-    if (req.method === "POST" && req.url === "/log") {
+    if (req.method === "POST" && path === "/log") {
 
         let body = "";
 
@@ -63,10 +66,14 @@ const server = http.createServer((req, res) => {
     }
 
     // Web stranica traži podatke
-    if (req.method === "GET" && req.url === "/data") {
+    if (req.method === "GET" && path === "/data") {
+
+        console.log("GET /data - citanje podataka iz Supabase");
 
         getMeasurements()
             .then(data => {
+
+                console.log("Podaci uspjesno procitani.");
 
                 res.writeHead(200, {
                     "Content-Type": "application/json; charset=utf-8",
@@ -81,7 +88,8 @@ const server = http.createServer((req, res) => {
                 console.error("Greska pri citanju:", error.message);
 
                 res.writeHead(500, {
-                    "Content-Type": "application/json; charset=utf-8"
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Access-Control-Allow-Origin": "*"
                 });
 
                 res.end(JSON.stringify({
