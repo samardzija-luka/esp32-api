@@ -24,14 +24,16 @@ const server = http.createServer((req, res) => {
 
             const datum = params.get("datum");
             const vrijeme = params.get("vrijeme");
-            const brzina = params.get("brzina");
+            const download = params.get("download");
+            const upload = params.get("upload");
 
             console.log("Primljeni podaci:");
             console.log("Datum:", datum);
             console.log("Vrijeme:", vrijeme);
-            console.log("Brzina:", brzina);
+            console.log("Download:", download);
+            console.log("Upload:", upload);
 
-            saveMeasurement(datum, vrijeme, brzina)
+            saveMeasurement(datum, vrijeme, download, upload)
                 .then(() => {
 
                     console.log("Podaci uspjesno sacuvani u Supabase.");
@@ -52,7 +54,8 @@ const server = http.createServer((req, res) => {
                     console.error("Greska pri cuvanju:", error.message);
 
                     res.writeHead(500, {
-                        "Content-Type": "application/json; charset=utf-8"
+                        "Content-Type": "application/json; charset=utf-8",
+                        "Access-Control-Allow-Origin": "*"
                     });
 
                     res.end(JSON.stringify({
