@@ -56,21 +56,22 @@ function supabaseRequest(path, method = "GET", data = null) {
     });
 }
 
-function saveMeasurement(datum, vrijeme, brzina) {
+function saveMeasurement(datum, vrijeme, download, upload) {
     return supabaseRequest(
         "/rest/v1/wifi_measurements",
         "POST",
         {
             datum: datum,
             vrijeme: vrijeme,
-            brzina: Number(brzina)
+            download: Number(download),
+            upload: Number(upload)
         }
     );
 }
 
 function getMeasurements() {
     return supabaseRequest(
-        "/rest/v1/wifi_measurements?select=*&order=datum.desc, vrijeme.desc&limit=100"
+        "/rest/v1/wifi_measurements?select=*&order=datum.desc,vrijeme.desc&limit=100"
     );
 }
 
