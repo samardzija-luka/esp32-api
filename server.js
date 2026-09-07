@@ -12,14 +12,28 @@ const server = http.createServer((req, res) => {
 
         req.on("end", () => {
 
+            const params = new URLSearchParams(body);
+
+            const datum = params.get("datum");
+            const vrijeme = params.get("vrijeme");
+            const brzina = params.get("brzina");
+
             console.log("Primljeni podaci:");
-            console.log(body);
+            console.log("Datum:", datum);
+            console.log("Vrijeme:", vrijeme);
+            console.log("Brzina:", brzina);
 
             res.writeHead(200, {
-                "Content-Type": "text/plain; charset=utf-8"
+                "Content-Type": "application/json; charset=utf-8",
+                "Access-Control-Allow-Origin": "*"
             });
 
-            res.end("PODACI PRIMLJENI");
+            res.end(JSON.stringify({
+                status: "ok",
+                datum: datum,
+                vrijeme: vrijeme,
+                brzina: brzina
+            }));
         });
 
     } else {
