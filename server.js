@@ -1,5 +1,5 @@
-const { saveMeasurement } = require("./db");
 const http = require("http");
+const { saveMeasurement } = require("./db");
 
 const server = http.createServer((req, res) => {
 
@@ -19,45 +19,40 @@ const server = http.createServer((req, res) => {
             const vrijeme = params.get("vrijeme");
             const brzina = params.get("brzina");
 
-           console.log("Primljeni podaci:");
-console.log("Datum:", datum);
-console.log("Vrijeme:", vrijeme);
-console.log("Brzina:", brzina);
+            console.log("Primljeni podaci:");
+            console.log("Datum:", datum);
+            console.log("Vrijeme:", vrijeme);
+            console.log("Brzina:", brzina);
 
-saveMeasurement(datum, vrijeme, brzina)
-    .then(() => {
-        console.log("Podaci uspjesno sacuvani u Supabase.");
+            saveMeasurement(datum, vrijeme, brzina)
+                .then(() => {
 
-        res.writeHead(200, {
-            "Content-Type": "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin": "*"
-        });
+                    console.log("Podaci uspjesno sacuvani u Supabase.");
 
-        res.end(JSON.stringify({
-            status: "ok",
-            message: "Podaci sacuvani"
-        }));
-    })
-    .catch(error => {
-        console.error("Greska pri cuvanju:", error.message);
+                    res.writeHead(200, {
+                        "Content-Type": "application/json; charset=utf-8",
+                        "Access-Control-Allow-Origin": "*"
+                    });
 
-        res.writeHead(500, {
-            "Content-Type": "application/json; charset=utf-8"
-        });
+                    res.end(JSON.stringify({
+                        status: "ok",
+                        message: "Podaci sacuvani"
+                    }));
 
-        res.end(JSON.stringify({
-            status: "error",
-            message: "Greska pri cuvanju podataka"
-        }));
-    });
-            });
+                })
+                .catch(error => {
 
-            res.end(JSON.stringify({
-                status: "ok",
-                datum: datum,
-                vrijeme: vrijeme,
-                brzina: brzina
-            }));
+                    console.error("Greska pri cuvanju:", error.message);
+
+                    res.writeHead(500, {
+                        "Content-Type": "application/json; charset=utf-8"
+                    });
+
+                    res.end(JSON.stringify({
+                        status: "error",
+                        message: "Greska pri cuvanju podataka"
+                    }));
+                });
         });
 
     } else {
