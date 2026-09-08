@@ -8,16 +8,14 @@ const server = http.createServer((req, res) => {
 
     const url = new URL(req.url, `http://${req.headers.host}`);
     const path = url.pathname;
-// Speed test - download
-// Speed test - download
+// Speed test - download// SPEED TEST DOWNLOAD
 if (req.method === "GET" && path === "/speedtest/download") {
 
-    const size = 5 * 1024 * 1024; // 5 MB
-    const chunk = Buffer.allocUnsafe(32 * 1024);
+    const size = 10 * 1024 * 1024; // 10 MB
+    const chunk = Buffer.alloc(64 * 1024);
 
-    // Popuni bafer podacima
     for (let i = 0; i < chunk.length; i++) {
-        chunk[i] = i % 256;
+        chunk[i] = i & 255;
     }
 
     res.writeHead(200, {
@@ -30,9 +28,13 @@ if (req.method === "GET" && path === "/speedtest/download") {
     let sent = 0;
 
     function send() {
+
         while (sent < size) {
-            const remaining = size - sent;
-            const length = Math.min(chunk.length, remaining);
+
+            const length = Math.min(
+                chunk.length,
+                size - sent
+            );
 
             if (!res.write(chunk.subarray(0, length))) {
                 res.once("drain", send);
