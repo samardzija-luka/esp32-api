@@ -12,41 +12,40 @@ const server = http.createServer((req, res) => {
 // Speed test - download
 if (req.method === "GET" && path === "/speedtest/download") {
 
-    const size = 20 * 1024 * 1024; // 20 MB
-    const chunk = Buffer.alloc(64 * 1024, 0);
+    const size = 5 * 1024 * 1024; // 5 MB
+    const chunk = Buffer.allocUnsafe(32 * 1024);
+
+    // Popuni bafer podacima
+    for (let i = 0; i < chunk.length; i++) {
+        chunk[i] = i % 256;
+    }
 
     res.writeHead(200, {
         "Content-Type": "application/octet-stream",
         "Content-Length": size,
-        "Cache-Control": "no-store, no-cache, must-revalidate",
-        "Pragma": "no-cache"
+        "Cache-Control": "no-store",
+        "Connection": "close"
     });
 
     let sent = 0;
 
-    function sendChunk() {
-
+    function send() {
         while (sent < size) {
-
             const remaining = size - sent;
+            const length = Math.min(chunk.length, remaining);
 
-            const data =
-                remaining >= chunk.length
-                    ? chunk
-                    : chunk.subarray(0, remaining);
-
-            sent += data.length;
-
-            if (!res.write(data)) {
-                res.once("drain", sendChunk);
+            if (!res.write(chunk.subarray(0, length))) {
+                res.once("drain", send);
                 return;
             }
+
+            sent += length;
         }
 
         res.end();
     }
 
-    sendChunk();
+    send();
     return;
 }
     // ESP32 šalje podatke
